@@ -1,4 +1,5 @@
 #include <la_file.h>
+#include <la_parameter.h>
 #include <la_string.h>
 #include "lib.h"
 
@@ -84,6 +85,10 @@ int main(int argc, char *argv[]) {
 			error("unknown error");
 	}
 
+	PARAMETER *param = parameter_new();
+	parameter_loadFromFile(param, input);
+
+	parameter_free(param);
 
 	free(output);
 	free(input);

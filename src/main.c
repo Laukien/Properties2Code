@@ -61,8 +61,14 @@ int main(int argc, char *argv[]) {
 	}
 	
 	/* output */
-	if (output == NULL)
-		output = strdup(input);
+	if (output == NULL) {
+		output = string_toLower(input);
+		int i;
+		for (i = 0; i < strlen(output); ++i) {
+			if (!isalnum(output[i]))
+				output[i] = '_';
+		}
+	}
 		
 	/* show parameters */
 	printf ( "INPUT:\t%s\n", input );

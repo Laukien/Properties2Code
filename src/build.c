@@ -10,7 +10,8 @@ BUILD *build_new() {
 
     self->input = NULL;                         /* no filename set */
     self->output = NULL;                        /* no filename set */
-    self->format = format_c;                    /* C */
+    self->format = format_unset;                /* no format */
+    self->debug = FALSE;                        /* no debugging */
     self->parameter = parameter_new();          /* init parameter */
     self->load = FALSE;                         /* not loaded */
 
@@ -35,6 +36,12 @@ void build_setFormat(BUILD *self, const format_t format) {
 	assert(self != NULL);
 
 	self->format = format;
+}
+
+void build_setDebug(BUILD *self, const BOOL debug) {
+	assert(self != NULL);
+
+	self->debug = debug;
 }
 
 void build_load(BUILD *self) {
@@ -88,6 +95,21 @@ void build_show(BUILD *self) {
 
 		free(value);
 		free(key);
+	}
+}
+
+void build_run(BUILD *self) {
+	assert(self != NULL);
+	assert(self->output != NULL);
+	assert(self->format != format_unset);
+	assert(self->load == TRUE);
+
+	switch (self->format) {
+		case format_c:
+			build_run_c(self);
+			break;
+		default:
+			error("invalid format");
 	}
 }
 

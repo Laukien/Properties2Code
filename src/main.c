@@ -80,12 +80,15 @@ int main(int argc, char *argv[]) {
 	build_setInput(obj, input);
 	build_setOutput(obj, output);
 	build_setFormat(obj, format);
+	build_setDebug(obj, debug);
 	build_load(obj);
 
 	/* show parameters */
 	if (debug)
 		build_show(obj);
 
+	/* run build */
+	build_run(obj);
 
 	/* free */
 	build_free(obj);

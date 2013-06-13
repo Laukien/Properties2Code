@@ -1,11 +1,12 @@
 CC := gcc
 CFLAGS := -O3 -Wall
 CFLAGS += -ggdb3
-LIB := build.o lib.o /usr/local/lib/liblac.a
+LIB := build_c.o build.o lib.o /usr/local/lib/liblac.a
 
 all:
 	$(CC) $(CFLAGS) -c -o lib.o src/lib.c
 	$(CC) $(CFLAGS) -c -o build.o src/build.c
+	$(CC) $(CFLAGS) -c -o build_c.o src/build_c.c
 	$(CC) $(CFLAGS) -o bin/prop2code src/main.c $(LIB)
 
 install:

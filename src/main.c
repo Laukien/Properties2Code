@@ -76,18 +76,19 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* init build-object */
-	BUILD *build = build_new();
-	build_setInput(build, input);
-	build_setOutput(build, output);
-	build_setFormat(build, format);
-	build_load(build);
+	BUILD *obj = build_new();
+	build_setInput(obj, input);
+	build_setOutput(obj, output);
+	build_setFormat(obj, format);
+	build_load(obj);
 
 	/* show parameters */
 	if (debug)
-		build_show(build);
+		build_show(obj);
 
 
 	/* free */
+	build_free(obj);
 	free(output);
 	free(input);
 

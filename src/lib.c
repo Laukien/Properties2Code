@@ -9,6 +9,7 @@ void showHelp() {
 	printf ( "Help Options:\n" );
 	printf ( "\t-h\t\t\tShow help options\n" );
 	printf ( "\t-v\t\t\tDisplays the current verion\n" );
+	printf ( "\t-d\t\t\tshow debug information\n" );
 	printf ( "\t-i <properties file>\tInput which is the source\n" );
 	printf ( "\t-o <output file>\tOutput which is the destination\n" );
 	printf ( "\t-f <format>\t\tFormat of output\n\t\t\t\tC, Cpp, Perl (default is C)\n" );

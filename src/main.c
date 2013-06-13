@@ -2,6 +2,7 @@
 #include <la_parameter.h>
 #include <la_string.h>
 #include "lib.h"
+#include "build.h"
 
 int main(int argc, char *argv[]) {
 
@@ -9,9 +10,10 @@ int main(int argc, char *argv[]) {
 	char *input = NULL;
 	char *output = NULL;
 	format_t format = format_c;
+	BOOL debug = FALSE;
 	int c;                                      /* switch */
 	opterr = 0;                                 /* reset error */
-	while ((c = getopt(argc, argv, "i:o:f:hv")) != -1) {
+	while ((c = getopt(argc, argv, "i:o:f:dhv")) != -1) {
 		switch (c) {
 			case 'i':                           /* input */
 				if (optarg == NULL)
@@ -36,6 +38,9 @@ int main(int argc, char *argv[]) {
 				free(tmp);
 				if (format == format_unknown)
 					error("invalid format");
+				break;
+			case 'd':                           /* debug */
+				debug = TRUE;
 				break;
 			case 'h':                           /* help */
 				showHelp();
@@ -69,33 +74,20 @@ int main(int argc, char *argv[]) {
 				output[i] = '_';
 		}
 	}
-		
+
+	/* init build-object */
+	BUILD *build = build_new();
+	build_setInput(build, input);
+	build_setOutput(build, output);
+	build_setFormat(build, format);
+	build_load(build);
+
 	/* show parameters */
-	printf ( "INPUT:\t%s\n", input );
-	printf ( "OUTPUT:\t%s\n", output );
-	printf ( "FORMAT:\t");
-	switch (format) {
-		case format_c:
-			printf ( "C\n" );
-			break;
-		case format_cpp:
-			printf ( "Cpp\n" );
-			break;
-		case format_perl:
-			printf ( "Perl\n" );
-			break;
-		case format_unknown:
-			printf ( "Unknown\n" );
-			break;
-		default:
-			error("unknown error");
-	}
+	if (debug)
+		build_show(build);
 
-	PARAMETER *param = parameter_new();
-	parameter_loadFromFile(param, input);
 
-	parameter_free(param);
-
+	/* free */
 	free(output);
 	free(input);
 

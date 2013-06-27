@@ -33,7 +33,7 @@ void build_run_c(BUILD *self) {
 	free(def);
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "#include <la_boolean.h>\n\n");
-	fprintf(pfile_h, "//void %s_show();\n", self->name);
+	fprintf(pfile_h, "void %s_show();\n", self->name);
 	fprintf(pfile_h, "void %s_load(const char *filename);\n", self->name);
 	if (!self->read) {                          /* NOT read only */
 		fprintf(pfile_h, "void %s_save(const char *filename);\n", self->name);
@@ -72,6 +72,7 @@ void build_run_c(BUILD *self) {
 	char *upper;
 	char *funct;
 	STRINGBUFFER *sb_typedef = stringbuffer_new();
+	STRINGBUFFER *sb_show = stringbuffer_new();
 	STRINGBUFFER *sb_load = stringbuffer_new();
 	STRINGBUFFER *sb_save = stringbuffer_new();
 	STRINGBUFFER *sb_access = stringbuffer_new();
@@ -114,6 +115,35 @@ void build_run_c(BUILD *self) {
 			stringbuffer_append(sb_typedef, alpha);
 		}
 		stringbuffer_append(sb_typedef, ";\n");
+
+		/* show */
+		stringbuffer_append(sb_show, "\n");
+		stringbuffer_append(sb_show, "\t/* ");
+		stringbuffer_append(sb_show, key);
+		stringbuffer_append(sb_show, " */\n");
+
+		if (isBoolean) {
+			stringbuffer_append(sb_show, "\ttmp = boolean_toString(");
+			stringbuffer_append(sb_show, self->name);
+			stringbuffer_append(sb_show, "_get");
+			stringbuffer_append(sb_show, funct);
+			stringbuffer_append(sb_show, "());\n");
+		}
+		stringbuffer_append(sb_show, "\tprintf(\"");
+		stringbuffer_append(sb_show, key);
+		if (isInteger)
+			stringbuffer_append(sb_show, ": %d\\n\", ");
+		else
+			stringbuffer_append(sb_show, ": %s\\n\", ");
+		if (isBoolean) {
+			stringbuffer_append(sb_show, "tmp);\n");
+			stringbuffer_append(sb_show, "\tfree(tmp);\n");
+		} else {
+			stringbuffer_append(sb_show, self->name);
+			stringbuffer_append(sb_show, "_get");
+			stringbuffer_append(sb_show, funct);
+			stringbuffer_append(sb_show, "());\n");
+		}
 
 		/* load */
 		stringbuffer_append(sb_load, "\n");
@@ -252,7 +282,15 @@ void build_run_c(BUILD *self) {
 	fprintf(pfile_c, "static %s_t _%s;\n", self->name, self->name);
 	fprintf(pfile_c, "\n");
 
+	/* show */
+	fprintf(pfile_c, "\n");
+	fprintf(pfile_c, "void %s_show() {\n", self->name);
+	fprintf(pfile_c, "\tchar *tmp;\n");
+	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_show));
+	fprintf(pfile_c, "}\n");
+
 	/* load */
+	fprintf(pfile_c, "\n");
 	fprintf(pfile_c, "void %s_load(const char *filename) {\n", self->name);
 	fprintf(pfile_c, "\tif (!file_exists(filename))\n");
 	fprintf(pfile_c, "\t\tmessage_error(\"properties-file not found\");\n");
@@ -286,6 +324,7 @@ void build_run_c(BUILD *self) {
 	stringbuffer_free(sb_access);
 	stringbuffer_free(sb_save);
 	stringbuffer_free(sb_load);
+	stringbuffer_free(sb_show);
 	stringbuffer_free(sb_typedef);
 	fclose(pfile_c);
 	fclose(pfile_h);

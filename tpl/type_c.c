@@ -16,13 +16,23 @@ typedef struct {
 
 static test_t _test;
 
+
 void test_show() {
-	printf ( "key: %s\n", test_getKey());
-	printf ( "integer: %d\n", test_getInteger() );
-	char *str = boolean_toString(test_getBoolean());
-	printf ( "boolean: %s\n", str );
-	free(str);
-	printf ( "main.sub: %s\n", test_getMainSub() );
+	char *tmp;
+
+	/* key */
+	printf("key: %s\n", test_getKey());
+
+	/* integer */
+	printf("integer: %d\n", test_getInteger());
+
+	/* boolean */
+	tmp = boolean_toString(test_getBoolean());
+	printf("boolean: %s\n", tmp);
+	free(tmp);
+
+	/* main.sub */
+	printf("main.sub: %s\n", test_getMainSub());
 }
 
 void test_load(const char *filename) {

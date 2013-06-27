@@ -19,10 +19,7 @@ test:
 	echo "int main(void) {" >> test_c_main.c
 	echo "	test_c_load(\"test.properties\");" >> test_c_main.c
 	echo "" >> test_c_main.c
-	echo "	printf ( \"Key: %s\n\", test_c_getKey() );" >> test_c_main.c
-	echo "	printf ( \"Integer: %d\n\", test_c_getInteger() );" >> test_c_main.c
-	echo "	printf ( \"Boolean: %s\n\", test_c_getBoolean() ? \"TRUE\" : \"FALSE\" );" >> test_c_main.c
-	echo "	printf ( \"Main.Sub: %s\n\", test_c_getMainSub() );" >> test_c_main.c
+	echo "	test_c_show();" >> test_c_main.c
 	echo "" >> test_c_main.c
 	echo "	test_c_save(\"test_c.backup\");" >> test_c_main.c
 	echo "" >> test_c_main.c

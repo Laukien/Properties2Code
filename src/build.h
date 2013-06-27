@@ -6,17 +6,19 @@
 
 typedef struct {
 	PARAMETER *parameter;
-	char *input;
-	char *output;
+	char *file;
+	char *name;
 	format_t format;
+	BOOL read;
 	BOOL debug;
 	BOOL load;
 } BUILD;
 
 BUILD *build_new();
-void build_setInput(BUILD *self, const char *filename);
-void build_setOutput(BUILD *self, const char *filename);
-void build_setFormat(BUILD *self, const format_t format);
+void build_setFile(BUILD *self, const char *filename);
+void build_setName(BUILD *self, const char *name);
+void build_setType(BUILD *self, const format_t format);
+void build_setRead(BUILD *self, const BOOL read);
 void build_setDebug(BUILD *self, const BOOL debug);
 void build_load(BUILD *self);
 void build_show(BUILD *self);

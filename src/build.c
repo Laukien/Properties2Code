@@ -1,16 +1,18 @@
+#include <la_message.h>
 #include "lib.h"
 #include "build.h"
 
 BUILD *build_new() {
 	BUILD *self = (BUILD *)malloc(sizeof(BUILD));
 	if (self == NULL)
-		error("unable to get memory");
+		message_error("unable to get memory");
 
     memset(self, 0, sizeof(BUILD));             /* clean memory */
 
-    self->input = NULL;                         /* no filename set */
-    self->output = NULL;                        /* no filename set */
+    self->file = NULL;                          /* no file set */
+    self->name = NULL;                          /* no name set */
     self->format = format_unset;                /* no format */
+    self->read = FALSE;                         /* read only */
     self->debug = FALSE;                        /* no debugging */
     self->parameter = parameter_new();          /* init parameter */
     self->load = FALSE;                         /* not loaded */
@@ -18,24 +20,30 @@ BUILD *build_new() {
 	return self;
 }
 
-void build_setInput(BUILD *self, const char *filename) {
+void build_setFile(BUILD *self, const char *filename) {
 	assert(self != NULL);
-	assert(self->input == NULL);
+	assert(self->file == NULL);
 
-	self->input = strdup(filename);
+	self->file = strdup(filename);
 }
 
-void build_setOutput(BUILD *self, const char *filename) {
+void build_setName(BUILD *self, const char *name) {
 	assert(self != NULL);
-	assert(self->output == NULL);
+	assert(self->name == NULL);
 
-	self->output = strdup(filename);
+	self->name = strdup(name);
 }
 
-void build_setFormat(BUILD *self, const format_t format) {
+void build_setType(BUILD *self, const format_t format) {
 	assert(self != NULL);
 
 	self->format = format;
+}
+
+void build_setRead(BUILD *self, const BOOL read) {
+	assert(self != NULL);
+
+	self->read = read;
 }
 
 void build_setDebug(BUILD *self, const BOOL debug) {
@@ -46,11 +54,11 @@ void build_setDebug(BUILD *self, const BOOL debug) {
 
 void build_load(BUILD *self) {
 	assert(self != NULL);
-	assert(self->input != NULL);
+	assert(self->file != NULL);
 	assert(self->parameter != NULL);
 	assert(self->load == FALSE);
 
-	parameter_loadFromFile(self->parameter, self->input);
+	parameter_loadFromFile(self->parameter, self->file);
 
 	self->load = TRUE;
 }
@@ -58,17 +66,17 @@ void build_load(BUILD *self) {
 void build_show(BUILD *self) {
 	assert(self != NULL);
 	assert(self->parameter != NULL);
-	assert(self->input != NULL);
-	assert(self->output != NULL);
+	assert(self->file != NULL);
+	assert(self->name != NULL);
 	assert(self->format != format_unset);
 	assert(self->load == TRUE);
 
-	printf ( "INPUT:\t\t%s\n", self->input );
-	printf ( "OUTPUT:\t\t%s\n", self->output );
-	printf ( "FORMAT:\t\t");
+	printf ( "FILE:\t\t%s\n", self->file );
+	printf ( "NAME:\t\t%s\n", self->name );
+	printf ( "TYPE:\t\t");
 	switch (self->format) {
 		case format_unset:
-			error("unset format");
+			message_error("unset type");
 		case format_c:
 			printf ( "C\n" );
 			break;
@@ -79,9 +87,9 @@ void build_show(BUILD *self) {
 			printf ( "Perl\n" );
 			break;
 		case format_unknown:
-			error("unknown format");
+			message_error("unknown type");
 		default:
-			error("unknown error");
+			message_error("unknown error");
 	}
 
 	unsigned int i;
@@ -100,7 +108,7 @@ void build_show(BUILD *self) {
 
 void build_run(BUILD *self) {
 	assert(self != NULL);
-	assert(self->output != NULL);
+	assert(self->name != NULL);
 	assert(self->format != format_unset);
 	assert(self->load == TRUE);
 
@@ -109,20 +117,20 @@ void build_run(BUILD *self) {
 			build_run_c(self);
 			break;
 		default:
-			error("invalid format");
+			message_error("invalid type");
 	}
 }
 
 void build_free(BUILD *self) {
 	assert(self != NULL);
 
-	if (self->input != NULL) {
-		free(self->input);
-		self->input = NULL;
+	if (self->file != NULL) {
+		free(self->file);
+		self->file = NULL;
 	}
-	if (self->output != NULL) {
-		free(self->output);
-		self->output = NULL;
+	if (self->name != NULL) {
+		free(self->name);
+		self->name = NULL;
 	}
 	if (self->parameter != NULL) {
 		parameter_free(self->parameter);

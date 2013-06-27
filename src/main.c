@@ -1,6 +1,8 @@
 #include <la_file.h>
+#include <la_message.h>
 #include <la_parameter.h>
 #include <la_string.h>
+#include <la_system.h>
 #include "lib.h"
 #include "build.h"
 
@@ -10,26 +12,27 @@ int main(int argc, char *argv[]) {
 	char *input = NULL;
 	char *output = NULL;
 	format_t format = format_c;
+	BOOL read = FALSE;
 	BOOL debug = FALSE;
 	int c;                                      /* switch */
 	opterr = 0;                                 /* reset error */
-	while ((c = getopt(argc, argv, "i:o:f:dhv")) != -1) {
+	while ((c = getopt(argc, argv, "f:n:t:ierdhv")) != -1) {
 		switch (c) {
-			case 'i':                           /* input */
+			case 'f':                           /* input file */
 				if (optarg == NULL)
-					error("properties file not given");
+					message_error("properties file not given");
 				input = strdup(optarg);
 				if (!file_exists(input))
-					error ("no such input file");
+					message_error ("no such input file");
 				break;
-			case 'o':                           /* output */
+			case 'n':                           /* name */
 				if (optarg == NULL)
-					error("file not given");
+					message_error("name not given");
 				output = strdup(optarg);
 				break;
-			case 'f':                           /* output */
+			case 't':                           /* type */
 				if (optarg == NULL)
-					error("format not given");
+					message_error("type of class");
 				char *tmp = string_toLower(optarg);
 				if (strcmp(tmp, "c") == 0) format = format_c;
 				else if (strcmp(tmp, "cpp") == 0) format = format_cpp;
@@ -37,7 +40,10 @@ int main(int argc, char *argv[]) {
 				else format = format_unknown;
 				free(tmp);
 				if (format == format_unknown)
-					error("invalid format");
+					message_error("invalid format");
+				break;
+			case 'r':                           /* read only */
+				read = TRUE;
 				break;
 			case 'd':                           /* debug */
 				debug = TRUE;
@@ -49,9 +55,9 @@ int main(int argc, char *argv[]) {
 				showVersion();
 				return (EXIT_SUCCESS);
 			case '?':                           /* other */
-				error("invalid argument");
+				message_error("invalid argument");
 			default:                            /* unknown */
-				error("unknown error");
+				message_error("unknown error");
 		}
 	}
 
@@ -61,13 +67,17 @@ int main(int argc, char *argv[]) {
 			input = strdup(argv[1]);
 		else {
 			showHelp();
-			error("no input argument");
+			message_error("no input argument");
 		}
 	}
 	
 	/* output */
 	if (output == NULL) {
 		output = string_toLower(input);
+		char *prop = strstr(output, ".properties");
+		if (prop != NULL)                       /* remove extension */
+			prop[0] = '\0';
+
 		int i;
 		for (i = 0; i < strlen(output); ++i) {
 			if (!isalnum(output[i]))
@@ -75,11 +85,16 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	/* debug */
+	if (system_isDebug())
+		debug = TRUE;
+
 	/* init build-object */
 	BUILD *obj = build_new();
-	build_setInput(obj, input);
-	build_setOutput(obj, output);
-	build_setFormat(obj, format);
+	build_setFile(obj, input);
+	build_setName(obj, output);
+	build_setType(obj, format);
+	build_setRead(obj, read);
 	build_setDebug(obj, debug);
 	build_load(obj);
 

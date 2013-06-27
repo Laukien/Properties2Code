@@ -22,6 +22,8 @@ typedef enum {
 
 void showHelp();
 void showVersion();
-void error(const char *message);
+char *key2Alpha(const char *key);
+char *key2Upper(const char *key);
+char *key2Function(const char *key);
 
 #endif

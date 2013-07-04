@@ -72,12 +72,14 @@ void build_run_c(BUILD *self) {
 	char *alpha;
 	char *upper;
 	char *funct;
-	STRINGBUFFER *sb_typedef = stringbuffer_new();
+	size_t size = parameter_size(self->parameter);
+	STRINGBUFFER *sb_definition = stringbuffer_new();
+	STRINGBUFFER *sb_declaration = stringbuffer_new();
 	STRINGBUFFER *sb_show = stringbuffer_new();
 	STRINGBUFFER *sb_load = stringbuffer_new();
 	STRINGBUFFER *sb_save = stringbuffer_new();
 	STRINGBUFFER *sb_access = stringbuffer_new();
-	for (i = 0; i < parameter_size(self->parameter); ++i) {
+	for (i = 0; i < size; ++i) {
 		isChar = FALSE;
 		isInteger = FALSE;
 		isBoolean = FALSE;
@@ -105,17 +107,34 @@ void build_run_c(BUILD *self) {
 
 		fprintf(pfile_h, "%s%s_get%s();\n", type, self->name, funct);
 
-		/* typedef */
-		stringbuffer_append(sb_typedef, "\t");
+		/* definition */
+		stringbuffer_append(sb_definition, "\t");
 		if (isChar) {
-			stringbuffer_append(sb_typedef, "char ");
-			stringbuffer_append(sb_typedef, alpha);
-			stringbuffer_append(sb_typedef, "[PARAMETER_VALUE_SIZE + 1]");
+			stringbuffer_append(sb_definition, "char ");
+			stringbuffer_append(sb_definition, alpha);
+			stringbuffer_append(sb_definition, "[PARAMETER_VALUE_SIZE + 1]");
 		} else {
-			stringbuffer_append(sb_typedef, type);
-			stringbuffer_append(sb_typedef, alpha);
+			stringbuffer_append(sb_definition, type);
+			stringbuffer_append(sb_definition, alpha);
 		}
-		stringbuffer_append(sb_typedef, ";\n");
+		stringbuffer_append(sb_definition, ";\n");
+
+		/* declaration */
+		stringbuffer_append(sb_declaration, "\t.");
+		stringbuffer_append(sb_declaration, alpha);
+		stringbuffer_append(sb_declaration, " = ");
+		if (isChar)
+			stringbuffer_append(sb_declaration, "\"");
+		if (isBoolean) {
+			BOOL tmp = boolean_toBoolean(value);
+			stringbuffer_append(sb_declaration, tmp ? "TRUE" : "FALSE");
+		} else 
+			stringbuffer_append(sb_declaration, value);
+		if (isChar)
+			stringbuffer_append(sb_declaration, "\"");
+		if (i < size -1)
+			stringbuffer_append(sb_declaration, ",");
+		stringbuffer_append(sb_declaration, "\n");
 
 		/* show */
 		stringbuffer_append(sb_show, "\n");
@@ -276,12 +295,15 @@ void build_run_c(BUILD *self) {
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "#endif\n");
 
-	/* typedef */
-	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_typedef));
+	/* definition */
+	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_definition));
 	fprintf(pfile_c, "} %s_t;\n", self->name);
 	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "static %s_t _%s;\n", self->name, self->name);
-	fprintf(pfile_c, "\n");
+
+	/* declaration */
+	fprintf(pfile_c, "static %s_t _%s = {\n", self->name, self->name);
+	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_declaration));
+	fprintf(pfile_c, "};\n");
 
 	/* show */
 	fprintf(pfile_c, "\n");
@@ -326,7 +348,8 @@ void build_run_c(BUILD *self) {
 	stringbuffer_free(sb_save);
 	stringbuffer_free(sb_load);
 	stringbuffer_free(sb_show);
-	stringbuffer_free(sb_typedef);
+	stringbuffer_free(sb_declaration);
+	stringbuffer_free(sb_definition);
 	fclose(pfile_c);
 	fclose(pfile_h);
 		

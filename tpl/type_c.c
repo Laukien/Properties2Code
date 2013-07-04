@@ -15,7 +15,12 @@ typedef struct {
 	char main_sub[PARAMETER_VALUE_SIZE + 1];
 } test_t;
 
-static test_t _test;
+static test_t _test = {
+	.key = "value",
+	.integer = 123,
+	.boolean = TRUE,
+	.main_sub = "example"
+};
 
 
 void test_show() {

@@ -6,6 +6,8 @@
 #include <la_number.h>
 #include <la_parameter.h>
 #include <la_string.h>
+#include <la_stringbuffer.h>
+#include <la_system.h>
 #include "type_c.h"
 
 typedef struct {
@@ -114,6 +116,35 @@ void test_save(const char *filename) {
 	parameter_free(param);
 }
 
+void test_open(const char *filename) {
+	if (!file_exists(filename))
+		test_save(filename);
+
+	STRINGBUFFER *cmd = stringbuffer_new();
+#ifdef SYSTEM_OS_TYPE_WINDOWS
+	stringbuffer_append(cmd, "notepad.exe");
+#else
+	if (file_exists("/usr/bin/vim"))
+		stringbuffer_append(cmd, "/usr/bin/vim");
+	else if (file_exists("/usr/bin/emacs"))
+		stringbuffer_append(cmd, "/usr/bin/emacs");
+	else if (file_exists("/usr/bin/nano"))
+		stringbuffer_append(cmd, "/usr/bin/nano");
+	else if (file_exists("/bin/vi"))
+		stringbuffer_append(cmd, "/bin/vi");
+	else
+		message_error("no editor found");
+#endif
+	stringbuffer_append(cmd, " ");
+	stringbuffer_append(cmd, filename);
+
+	system(stringbuffer_getTextPointer(cmd));
+
+	stringbuffer_free(cmd);
+
+	test_load(filename);
+}
+
 void test_setKey(const char *value) {
 	if (strlen(value) > PARAMETER_VALUE_SIZE)
 		message_error("value to long");
@@ -157,6 +188,7 @@ int main(void) {
 	test_load("test.properties");
 
 	test_show();
+	test_open("test.properties");
 
 	test_save("test.backup");
 

@@ -9,7 +9,7 @@
 #include "type_c.h"
 
 typedef struct {
-	char key[PARAMETER_VALUE_SIZE + 1];
+	char key[PARAMETER_VALUE_SIZE + 1] ="te";
 	int integer;
 	BOOL boolean;
 	char main_sub[PARAMETER_VALUE_SIZE + 1];

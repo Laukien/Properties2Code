@@ -54,6 +54,7 @@ void build_run_c(BUILD *self) {
 		message_error("unable to create code");
 
 	fprintf(pfile_c, "#include <stdlib.h>\n");
+	fprintf(pfile_c, "#include <stdio.h>\n");
 	fprintf(pfile_c, "#include <string.h>\n");
 	fprintf(pfile_c, "#include <la_file.h>\n");
 	fprintf(pfile_c, "#include <la_message.h>\n");

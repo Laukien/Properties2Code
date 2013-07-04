@@ -70,6 +70,8 @@ int main(int argc, char *argv[]) {
 			message_error("no input argument");
 		}
 	}
+	if (!file_exists(input))
+		message_error("file doesn't exists");
 	
 	/* output */
 	if (output == NULL) {

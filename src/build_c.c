@@ -37,7 +37,7 @@ void build_run_c(BUILD *self) {
 	fprintf(pfile_h, "void %s_load(const char *filename);\n", self->name);
 	if (!self->read) {                          /* NOT read only */
 		fprintf(pfile_h, "void %s_save(const char *filename);\n", self->name);
-		fprintf(pfile_h, "//void %s_open(const char *filename);\n", self->name);
+		fprintf(pfile_h, "void %s_open(const char *filename);\n", self->name);
 		fprintf(pfile_h, "//void %s_edit();\n", self->name);
 	}
 	fprintf(pfile_h, "\n");
@@ -61,6 +61,8 @@ void build_run_c(BUILD *self) {
 	fprintf(pfile_c, "#include <la_number.h>\n");
 	fprintf(pfile_c, "#include <la_parameter.h>\n");
 	fprintf(pfile_c, "#include <la_string.h>\n");
+	fprintf(pfile_c, "#include <la_stringbuffer.h>\n");
+	fprintf(pfile_c, "#include <la_system.h>\n");
 	fprintf(pfile_c, "#include \"%s.h\"\n", self->name);
 	fprintf(pfile_c, "\n");
 	fprintf(pfile_c, "typedef struct {\n");
@@ -338,6 +340,39 @@ void build_run_c(BUILD *self) {
 		fprintf(pfile_c, "\n");
 		fprintf(pfile_c, "\tparameter_saveToFile(param, filename);\n");
 		fprintf(pfile_c, "\tparameter_free(param);\n");
+		fprintf(pfile_c, "}\n");
+	}
+
+	/* open */
+	if (!self->read) {
+		fprintf(pfile_c, "\n");
+		fprintf(pfile_c, "void %s_open(const char *filename) {\n", self->name);
+		fprintf(pfile_c, "\tif (!file_exists(filename))\n");
+		fprintf(pfile_c, "\t\t%s_save(filename);\n", self->name);
+		fprintf(pfile_c, "\n");
+		fprintf(pfile_c, "\tSTRINGBUFFER *cmd = stringbuffer_new();\n");
+		fprintf(pfile_c, "#ifdef SYSTEM_OS_TYPE_WINDOW\n");
+		fprintf(pfile_c, "\tstringbuffer_append(cmd, \"notepad.exe\");\n");
+		fprintf(pfile_c, "#else\n");
+		fprintf(pfile_c, "\tif (file_exists(\"/usr/bin/vim\"))\n");
+		fprintf(pfile_c, "\t\tstringbuffer_append(cmd, \"/usr/bin/vim\");\n");
+		fprintf(pfile_c, "\telse if (file_exists(\"/usr/bin/emacs\"))\n");
+		fprintf(pfile_c, "\t\tstringbuffer_append(cmd, \"/usr/bin/emacs\");\n");
+		fprintf(pfile_c, "\telse if (file_exists(\"/usr/bin/nano\"))\n");
+		fprintf(pfile_c, "\t\tstringbuffer_append(cmd, \"/usr/bin/nano\");\n");
+		fprintf(pfile_c, "\telse if (file_exists(\"/bin/vi\"))\n");
+		fprintf(pfile_c, "\t\tstringbuffer_append(cmd, \"/bin/vi\");\n");
+		fprintf(pfile_c, "\telse\n");
+		fprintf(pfile_c, "\t\tmessage_error(\"no editor found\");\n");
+		fprintf(pfile_c, "#endif\n");
+		fprintf(pfile_c, "\tstringbuffer_append(cmd, \" \");\n");
+		fprintf(pfile_c, "\tstringbuffer_append(cmd, filename);\n");
+		fprintf(pfile_c, "\n");
+		fprintf(pfile_c, "\tsystem(stringbuffer_getTextPointer(cmd));\n");
+		fprintf(pfile_c, "\n");
+		fprintf(pfile_c, "\tstringbuffer_free(cmd);\n");
+		fprintf(pfile_c, "\n");
+		fprintf(pfile_c, "\t%s_load(filename);\n", self->name);
 		fprintf(pfile_c, "}\n");
 	}
 

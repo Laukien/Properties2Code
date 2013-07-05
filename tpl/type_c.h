@@ -1,3 +1,5 @@
+/*  Properties2Code v.0.2.0 by Stephan Laukien */
+
 #ifndef TEST_H
 #define TEST_H
 

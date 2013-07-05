@@ -80,6 +80,7 @@ void build_run_c(BUILD *self) {
 	STRINGBUFFER *sb_show = stringbuffer_new();
 	STRINGBUFFER *sb_load = stringbuffer_new();
 	STRINGBUFFER *sb_save = stringbuffer_new();
+	STRINGBUFFER *sb_edit = stringbuffer_new();
 	STRINGBUFFER *sb_access = stringbuffer_new();
 	for (i = 0; i < size; ++i) {
 		isChar = FALSE;
@@ -242,35 +243,102 @@ void build_run_c(BUILD *self) {
 				stringbuffer_append(sb_save, "\", tmp);\n");
 				stringbuffer_append(sb_save, "\tfree(tmp);\n");
 			}
+		}
 
-			/* access */
-			if (!self->read) {
-				stringbuffer_append(sb_access, "\n");
-				stringbuffer_append(sb_access, "void ");
-				stringbuffer_append(sb_access, self->name);
-				stringbuffer_append(sb_access, "_set");
-				stringbuffer_append(sb_access, funct);
-				stringbuffer_append(sb_access, "(const ");
-				stringbuffer_append(sb_access, type);
-				stringbuffer_append(sb_access, "value) {\n");
-				if (isChar) {
-					stringbuffer_append(sb_access, "\tif (strlen(value) > PARAMETER_VALUE_SIZE)\n");
-					stringbuffer_append(sb_access, "\t\tmessage_error(\"value to long\");\n");
-					stringbuffer_append(sb_access, "\n");
-					stringbuffer_append(sb_access, "\tstrcpy(_");
-					stringbuffer_append(sb_access, self->name);
-					stringbuffer_append(sb_access, ".");
-					stringbuffer_append(sb_access, alpha);
-					stringbuffer_append(sb_access, ", value);\n");
-				} else {
-					stringbuffer_append(sb_access, "\t_");
-					stringbuffer_append(sb_access, self->name);
-					stringbuffer_append(sb_access, ".");
-					stringbuffer_append(sb_access, alpha);
-					stringbuffer_append(sb_access, " = value;\n");
-				}
-				stringbuffer_append(sb_access, "}\n");
+		/* edit */
+		if (!self->read) {
+			stringbuffer_append(sb_edit, "\n");
+			stringbuffer_append(sb_edit, "\t/* ");
+			stringbuffer_append(sb_edit, key);
+			stringbuffer_append(sb_edit, " */\n");
+
+			if (isChar) {
+				stringbuffer_append(sb_edit, "\tprintf(\"");
+				stringbuffer_append(sb_edit, key);
+				stringbuffer_append(sb_edit, " [%s]: \", _");
+				stringbuffer_append(sb_edit, self->name);
+				stringbuffer_append(sb_edit, ".");
+				stringbuffer_append(sb_edit, alpha);
+				stringbuffer_append(sb_edit, ");\n");
+			} else if (isInteger) {
+				stringbuffer_append(sb_edit, "\tprintf(\"");
+				stringbuffer_append(sb_edit, key);
+				stringbuffer_append(sb_edit, " [%d]: \", _");
+				stringbuffer_append(sb_edit, self->name);
+				stringbuffer_append(sb_edit, ".");
+				stringbuffer_append(sb_edit, alpha);
+				stringbuffer_append(sb_edit, ");\n");
+			} else if (isBoolean) {
+				stringbuffer_append(sb_edit, "\ttmp = boolean_toString(_");
+				stringbuffer_append(sb_edit, self->name);
+				stringbuffer_append(sb_edit, ".");
+				stringbuffer_append(sb_edit, alpha);
+				stringbuffer_append(sb_edit, ");\n");
+				stringbuffer_append(sb_edit, "\tprintf(\"");
+				stringbuffer_append(sb_edit, key);
+				stringbuffer_append(sb_edit, " [%s]: \", tmp");
+				stringbuffer_append(sb_edit, ");\n");
+				stringbuffer_append(sb_edit, "\tfree(tmp);\n");
 			}
+			stringbuffer_append(sb_edit, "\tfflush(stdout);\n");
+			stringbuffer_append(sb_edit, "\tfgets(buffer, PARAMETER_VALUE_SIZE , stdin);\n");
+			stringbuffer_append(sb_edit, "\ttmp = string_trim(buffer);\n");
+			stringbuffer_append(sb_edit, "\tif (tmp) {\n");
+			if (isChar) {
+				stringbuffer_append(sb_edit, "\t\tstrcpy(_");
+				stringbuffer_append(sb_edit, self->name);
+				stringbuffer_append(sb_edit, ".");
+				stringbuffer_append(sb_edit, alpha);
+				stringbuffer_append(sb_edit, ", tmp);\n");
+			} else if(isInteger) {
+				stringbuffer_append(sb_edit, "\t\tif (!number_isInteger(tmp))\n");
+				stringbuffer_append(sb_edit, "\t\t\tmessage_error(\"invalid value\");\n");
+				stringbuffer_append(sb_edit, "\t\t_");
+				stringbuffer_append(sb_edit, self->name);
+				stringbuffer_append(sb_edit, ".");
+				stringbuffer_append(sb_edit, alpha);
+				stringbuffer_append(sb_edit, " = number_toInteger(tmp);\n");
+
+			} else if(isBoolean) {
+				stringbuffer_append(sb_edit, "\t\tif (!boolean_isBoolean(tmp))\n");
+				stringbuffer_append(sb_edit, "\t\t\tmessage_error(\"invalid value\");\n");
+				stringbuffer_append(sb_edit, "\t\t_");
+				stringbuffer_append(sb_edit, self->name);
+				stringbuffer_append(sb_edit, ".");
+				stringbuffer_append(sb_edit, alpha);
+				stringbuffer_append(sb_edit, " = boolean_toBoolean(tmp);\n");
+			}
+			stringbuffer_append(sb_edit, "\t}\n");
+			stringbuffer_append(sb_edit, "\tfree(tmp);\n");
+		}
+			/* access */
+		if (!self->read) {
+			stringbuffer_append(sb_access, "\n");
+			stringbuffer_append(sb_access, "void ");
+			stringbuffer_append(sb_access, self->name);
+			stringbuffer_append(sb_access, "_set");
+			stringbuffer_append(sb_access, funct);
+			stringbuffer_append(sb_access, "(const ");
+			stringbuffer_append(sb_access, type);
+			stringbuffer_append(sb_access, "value) {\n");
+			if (isChar) {
+				stringbuffer_append(sb_access, "\tif (strlen(value) > PARAMETER_VALUE_SIZE)\n");
+				stringbuffer_append(sb_access, "\t\tmessage_error(\"value to long\");\n");
+				stringbuffer_append(sb_access, "\n");
+				stringbuffer_append(sb_access, "\tstrcpy(_");
+				stringbuffer_append(sb_access, self->name);
+				stringbuffer_append(sb_access, ".");
+				stringbuffer_append(sb_access, alpha);
+				stringbuffer_append(sb_access, ", value);\n");
+			} else {
+				stringbuffer_append(sb_access, "\t_");
+				stringbuffer_append(sb_access, self->name);
+				stringbuffer_append(sb_access, ".");
+				stringbuffer_append(sb_access, alpha);
+				stringbuffer_append(sb_access, " = value;\n");
+			}
+			stringbuffer_append(sb_access, "}\n");
+
 			stringbuffer_append(sb_access, "\n");
 			stringbuffer_append(sb_access, type);
 			stringbuffer_append(sb_access, self->name);
@@ -376,10 +444,21 @@ void build_run_c(BUILD *self) {
 		fprintf(pfile_c, "}\n");
 	}
 
+	/* edit */
+	if (!self->read) {
+		fprintf(pfile_c, "\n");
+		fprintf(pfile_c, "void %s_edit() {\n", self->name);
+		fprintf(pfile_c, "\tchar buffer[PARAMETER_VALUE_SIZE + 1];\n");
+		fprintf(pfile_c, "\tchar *tmp;\n");
+		fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_edit));
+		fprintf(pfile_c, "}\n");
+	}
+
 	/* access */
 	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_access));
 
 	stringbuffer_free(sb_access);
+	stringbuffer_free(sb_edit);
 	stringbuffer_free(sb_save);
 	stringbuffer_free(sb_load);
 	stringbuffer_free(sb_show);

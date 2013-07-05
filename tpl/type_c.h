@@ -9,7 +9,7 @@ void test_show();
 void test_load(const char *filename);
 void test_save(const char *filename);
 void test_open(const char *filename);
-//void test_edit();
+void test_edit();
 
 void test_setKey(const char *value);
 char *test_getKey();

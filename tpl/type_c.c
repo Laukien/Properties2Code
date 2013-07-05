@@ -145,6 +145,57 @@ void test_open(const char *filename) {
 	test_load(filename);
 }
 
+void test_edit() {
+	char buffer[PARAMETER_VALUE_SIZE + 1];
+	char *tmp;
+
+	/* key */
+	printf("key [%s]: ", _test.key);
+	fflush(stdout);
+	fgets(buffer, PARAMETER_VALUE_SIZE , stdin);
+	tmp = string_trim(buffer);
+	if (tmp) {
+		strcpy(_test.key, tmp);
+	}
+	free(tmp);
+
+	/* integer */
+	printf("integer [%d]: ", _test.integer);
+	fflush(stdout);
+	fgets(buffer, PARAMETER_VALUE_SIZE , stdin);
+	tmp = string_trim(buffer);
+	if (tmp) {
+		if (!number_isInteger(tmp))
+			message_error("invalid value");
+		_test.integer = number_toInteger(tmp);
+	}
+	free(tmp);
+
+	/* boolean */
+	tmp = boolean_toString(_test.boolean);
+	printf("boolean [%s]: ", tmp);
+	free(tmp);
+	fflush(stdout);
+	fgets(buffer, PARAMETER_VALUE_SIZE , stdin);
+	tmp = string_trim(buffer);
+	if (tmp) {
+		if (!boolean_isBoolean(tmp))
+			message_error("invalid value");
+		_test.boolean = boolean_toBoolean(tmp);
+	}
+	free(tmp);
+
+	/* main.sub */
+	printf("main.sub [%s]: ", _test.main_sub);
+	fflush(stdout);
+	fgets(buffer, PARAMETER_VALUE_SIZE , stdin);
+	tmp = string_trim(buffer);
+	if (tmp) {
+		strcpy(_test.main_sub, tmp);
+	}
+	free(tmp);
+}
+
 void test_setKey(const char *value) {
 	if (strlen(value) > PARAMETER_VALUE_SIZE)
 		message_error("value to long");
@@ -187,8 +238,9 @@ char *test_getMainSub() {
 int main(void) {
 	test_load("test.properties");
 
+	test_edit();
 	test_show();
-	test_open("test.properties");
+//	test_open("test.properties");
 
 	test_save("test.backup");
 

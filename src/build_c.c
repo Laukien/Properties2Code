@@ -38,7 +38,7 @@ void build_run_c(BUILD *self) {
 	if (!self->read) {                          /* NOT read only */
 		fprintf(pfile_h, "void %s_save(const char *filename);\n", self->name);
 		fprintf(pfile_h, "void %s_open(const char *filename);\n", self->name);
-		fprintf(pfile_h, "//void %s_edit();\n", self->name);
+		fprintf(pfile_h, "void %s_edit();\n", self->name);
 	}
 	fprintf(pfile_h, "\n");
 	

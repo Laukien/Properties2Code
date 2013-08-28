@@ -7,6 +7,7 @@ CXXFLAGS += -ggdb3
 LIB := build_c.o build_cpp.o build.o lib.o /usr/local/lib/libla.a
 
 all:
+	mkdir -p bin
 	$(CC) $(CFLAGS) -c -o lib.o src/lib.c
 	$(CC) $(CFLAGS) -c -o build.o src/build.c
 	$(CC) $(CFLAGS) -c -o build_c.o src/build_c.c

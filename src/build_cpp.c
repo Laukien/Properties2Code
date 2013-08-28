@@ -6,7 +6,7 @@
 #include "lib.h"
 #include "build.h"
 
-void build_run_c(BUILD *self) {
+void build_run_cpp(BUILD *self) {
 	assert(self != NULL);
 	assert(self->name != NULL);
 
@@ -33,13 +33,12 @@ void build_run_c(BUILD *self) {
 	free(def);
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "#include <la_boolean.h>\n\n");
-	fprintf(pfile_h, "void %s_clean();\n", self->name);
 	fprintf(pfile_h, "void %s_show();\n", self->name);
 	fprintf(pfile_h, "void %s_load(const char *filename);\n", self->name);
 	if (!self->read) {                          /* NOT read only */
 		fprintf(pfile_h, "void %s_save(const char *filename);\n", self->name);
 		fprintf(pfile_h, "void %s_open(const char *filename);\n", self->name);
-		fprintf(pfile_h, "void %s_edit();\n", self->name);
+		fprintf(pfile_h, "//void %s_edit();\n", self->name);
 	}
 	fprintf(pfile_h, "\n");
 	
@@ -375,12 +374,6 @@ void build_run_c(BUILD *self) {
 	fprintf(pfile_c, "static %s_t _%s = {\n", self->name, self->name);
 	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_declaration));
 	fprintf(pfile_c, "};\n");
-
-	/* clean */
-	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "void %s_clean() {\n", self->name);
-	fprintf(pfile_c, "\tmemset(&_%s, '\\0', sizeof(%s_t));\n", self->name, self->name);
-	fprintf(pfile_c, "}\n");
 
 	/* show */
 	fprintf(pfile_c, "\n");

@@ -24,6 +24,7 @@ void build_load(BUILD *self);
 void build_show(BUILD *self);
 void build_run(BUILD *self);
 void build_run_c(BUILD *self);
+void build_run_cpp(BUILD *self);
 void build_free(BUILD *self);
 
 #endif

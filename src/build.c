@@ -116,6 +116,9 @@ void build_run(BUILD *self) {
 		case format_c:
 			build_run_c(self);
 			break;
+		case format_cpp:
+			build_run_cpp(self);
+			break;
 		default:
 			message_error("invalid type");
 	}

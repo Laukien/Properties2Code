@@ -33,7 +33,7 @@ void build_run_c(BUILD *self) {
 	free(def);
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "#include <la_boolean.h>\n\n");
-	fprintf(pfile_h, "void %s_clean();\n", self->name);
+	fprintf(pfile_h, "void %s_init();\n", self->name);
 	fprintf(pfile_h, "void %s_show();\n", self->name);
 	fprintf(pfile_h, "void %s_load(const char *filename);\n", self->name);
 	if (!self->read) {                          /* NOT read only */
@@ -78,6 +78,7 @@ void build_run_c(BUILD *self) {
 	size_t size = parameter_size(self->parameter);
 	STRINGBUFFER *sb_definition = stringbuffer_new();
 	STRINGBUFFER *sb_declaration = stringbuffer_new();
+	STRINGBUFFER *sb_init = stringbuffer_new();
 	STRINGBUFFER *sb_show = stringbuffer_new();
 	STRINGBUFFER *sb_load = stringbuffer_new();
 	STRINGBUFFER *sb_save = stringbuffer_new();
@@ -139,6 +140,44 @@ void build_run_c(BUILD *self) {
 		if (i < size -1)
 			stringbuffer_append(sb_declaration, ",");
 		stringbuffer_append(sb_declaration, "\n");
+
+		/* init */
+		stringbuffer_append(sb_init, "\t");
+		if (isChar) {
+			/*
+			 * strcpy(_self->name.alpha, value);
+			 */
+			stringbuffer_append(sb_init, "strcpy(");
+			stringbuffer_append(sb_init, "_");
+			stringbuffer_append(sb_init, self->name);
+			stringbuffer_append(sb_init, ".");
+			stringbuffer_append(sb_init, alpha);
+			stringbuffer_append(sb_init, ", \"");
+			stringbuffer_append(sb_init, value);
+			stringbuffer_append(sb_init, "\")");
+		} else if (isInteger) {
+			/*
+			 * _self->name.alpha = value
+			 */
+			stringbuffer_append(sb_init, "_");
+			stringbuffer_append(sb_init, self->name);
+			stringbuffer_append(sb_init, ".");
+			stringbuffer_append(sb_init, alpha);
+			stringbuffer_append(sb_init, " = ");
+			stringbuffer_append(sb_init, value);
+		} else if (isBoolean) {
+			/*
+			 * _self->name.alpha = TRUE|FALSE
+			 */
+			stringbuffer_append(sb_init, "_");
+			stringbuffer_append(sb_init, self->name);
+			stringbuffer_append(sb_init, ".");
+			stringbuffer_append(sb_init, alpha);
+			stringbuffer_append(sb_init, " = ");
+			BOOL tmp = boolean_toBoolean(value);
+			stringbuffer_append(sb_init, tmp ? "TRUE" : "FALSE");
+		}
+		stringbuffer_append(sb_init, ";\n");
 
 		/* show */
 		stringbuffer_append(sb_show, "\n");
@@ -376,10 +415,12 @@ void build_run_c(BUILD *self) {
 	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_declaration));
 	fprintf(pfile_c, "};\n");
 
-	/* clean */
+	/* init */
 	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "void %s_clean() {\n", self->name);
+	fprintf(pfile_c, "void %s_init() {\n", self->name);
 	fprintf(pfile_c, "\tmemset(&_%s, '\\0', sizeof(%s_t));\n", self->name, self->name);
+	fprintf(pfile_c, "\n");
+	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_init));
 	fprintf(pfile_c, "}\n");
 
 	/* show */

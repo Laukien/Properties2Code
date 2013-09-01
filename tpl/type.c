@@ -24,8 +24,13 @@ static test_t _test = {
 	.main_sub = "example"
 };
 
-void test_clean() {
+void test_init() {
 	memset(&_test, '\0', sizeof(test_t));
+
+	strcpy(_test.key, "value");
+	_test.integer = 123;
+	_test.boolean = TRUE;
+	strcpy(_test.main_sub, "example");
 }
 
 void test_show() {
@@ -50,7 +55,7 @@ void test_load(const char *filename) {
 	if (!file_exists(filename))
 		message_error("properties-file not found");
 
-	test_clean();
+	test_init();
 
 	char *tmp;
 	PARAMETER *param = parameter_new();

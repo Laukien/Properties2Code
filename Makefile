@@ -19,22 +19,21 @@ template:
 	$(CXX) $(CXXFLAGS) -o tpl/type_cpp tpl/type.cpp /usr/local/lib/libla++.a
 
 test:
-	bin/prop2code -f test.properties -t c -n test_c
-	echo "#include <stdio.h>" > test_c_main.c
-	echo "#include \"test_c.h\"" >> test_c_main.c
-	echo "int main(void) {" >> test_c_main.c
-	echo "	test_c_load(\"test.properties\");" >> test_c_main.c
-	echo "" >> test_c_main.c
-	echo "	test_c_show();" >> test_c_main.c
-	echo "" >> test_c_main.c
-	echo "	test_c_save(\"test_c.backup\");" >> test_c_main.c
-	echo "" >> test_c_main.c
-	echo "	return 0;" >> test_c_main.c
-	echo "}" >> test_c_main.c
-	$(CC) $(CFLAGS) -c -o test_c.o test_c.c
-	$(CC) $(CFLAGS) -o test_c test_c_main.c test_c.o /usr/local/lib/libla.a
+	bin/prop2code -f test.properties -t c -n test
+	echo "#include <stdio.h>" > test_c.c
+	echo "#include \"test.h\"" >> test_c.c
+	echo "int main(void) {" >> test_c.c
+	echo "	test_load(\"test.properties\");" >> test_c.c
+	echo "" >> test_c.c
+	echo "	test_show();" >> test_c.c
+	echo "" >> test_c.c
+	echo "	test_save(\"test_c.backup\");" >> test_c.c
+	echo "" >> test_c.c
+	echo "	return 0;" >> test_c.c
+	echo "}" >> test_c.c
+	$(CC) $(CFLAGS) -o test_c test_c.c test.c /usr/local/lib/libla.a
 	./test_c
-	bin/prop2code -f test.properties -t cpp -n test_cpp
+	bin/prop2code -f test.properties -t cpp -n test
 
 install:
 	strip bin/prop2code

@@ -54,7 +54,7 @@ void build_run_c(BUILD *self) {
 			strcpy(type, "char *");
 		}
 
-		/* header */
+		/* public */
         if (!self->read) {                      /* NOT read only */
 			/*
 			 * void self->name_setfunct(const typevalue);\n
@@ -424,6 +424,7 @@ void build_run_c(BUILD *self) {
 	fprintf(pfile_c, "#include \"%s.h\"\n", self->name);
 	fprintf(pfile_c, "\n");
 	fprintf(pfile_c, "typedef struct {\n");
+
 	/* definition */
 	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_definition));
 	fprintf(pfile_c, "} %s_t;\n", self->name);

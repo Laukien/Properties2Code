@@ -13,59 +13,9 @@ void build_run_cpp(BUILD *self) {
 	unsigned int i;
 	char *key;
 	char *value;
-	char type[8];
+	char type[15];
 
-	/* header */
-	char *file_h = (char *) malloc(strlen(self->name) + 2 + 1);
-	strcpy(file_h, self->name);
-	strcat(file_h, ".h");
-	if (self->debug)
-		printf ( "HEADER-FILE:\t%s\n", file_h );
-	FILE *pfile_h;
-	pfile_h = fopen(file_h, "w");
-	if (pfile_h ==NULL)
-		message_error("unable to create header");
 
-	fprintf(pfile_h, "/* %s v.%s by %s */\n\n", PRG_NAME, PRG_VERSION, PRG_AUTHOR);
-	char *def = string_toUpper(self->name);
-	fprintf(pfile_h, "#ifndef %s_H\n", def);
-	fprintf(pfile_h, "#define %s_H\n", def);
-	free(def);
-	fprintf(pfile_h, "\n");
-	fprintf(pfile_h, "#include <la_boolean.h>\n\n");
-	fprintf(pfile_h, "void %s_show();\n", self->name);
-	fprintf(pfile_h, "void %s_load(const char *filename);\n", self->name);
-	if (!self->read) {                          /* NOT read only */
-		fprintf(pfile_h, "void %s_save(const char *filename);\n", self->name);
-		fprintf(pfile_h, "void %s_open(const char *filename);\n", self->name);
-		fprintf(pfile_h, "//void %s_edit();\n", self->name);
-	}
-	fprintf(pfile_h, "\n");
-	
-	/* code */
-	char *file_c = (char *) malloc(strlen(self->name) + 2 + 1);
-	strcpy(file_c, self->name);
-	strcat(file_c, ".c");
-	if (self->debug)
-		printf ( "CODE-FILE:\t%s\n", file_c );
-	FILE *pfile_c;
-	pfile_c = fopen(file_c, "w");
-	if (pfile_c ==NULL)
-		message_error("unable to create code");
-
-	fprintf(pfile_c, "#include <stdlib.h>\n");
-	fprintf(pfile_c, "#include <stdio.h>\n");
-	fprintf(pfile_c, "#include <string.h>\n");
-	fprintf(pfile_c, "#include <la_file.h>\n");
-	fprintf(pfile_c, "#include <la_message.h>\n");
-	fprintf(pfile_c, "#include <la_number.h>\n");
-	fprintf(pfile_c, "#include <la_parameter.h>\n");
-	fprintf(pfile_c, "#include <la_string.h>\n");
-	fprintf(pfile_c, "#include <la_stringbuffer.h>\n");
-	fprintf(pfile_c, "#include <la_system.h>\n");
-	fprintf(pfile_c, "#include \"%s.h\"\n", self->name);
-	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "typedef struct {\n");
 
 	/* body */
 	BOOL isChar;
@@ -75,8 +25,9 @@ void build_run_cpp(BUILD *self) {
 	char *upper;
 	char *funct;
 	size_t size = parameter_size(self->parameter);
-	STRINGBUFFER *sb_definition = stringbuffer_new();
-	STRINGBUFFER *sb_declaration = stringbuffer_new();
+	STRINGBUFFER *sb_public = stringbuffer_new();
+	STRINGBUFFER *sb_private = stringbuffer_new();
+	STRINGBUFFER *sb_init = stringbuffer_new();
 	STRINGBUFFER *sb_show = stringbuffer_new();
 	STRINGBUFFER *sb_load = stringbuffer_new();
 	STRINGBUFFER *sb_save = stringbuffer_new();
@@ -98,46 +49,80 @@ void build_run_cpp(BUILD *self) {
 			strcpy(type, "int ");
 		} else if (boolean_isBoolean(value)) {
 			isBoolean = TRUE;
-			strcpy(type, "BOOL ");
+			strcpy(type, "bool ");
 		} else {
 			isChar = TRUE;
-			strcpy(type, "char *");
+			strcpy(type, "std::string ");
 		}
 
-		/* header */
-		if (!self->read)                        /* NOT read only */
-			fprintf(pfile_h, "void %s_set%s(const %svalue);\n", self->name, funct, type);
+		/* public */
+        if (!self->read) {                      /* NOT read only */
+			/*
+			 * void self->name_setfunct(const typevalue);\n
+			 */
+			stringbuffer_append(sb_public, "\t\tvoid ");
+			stringbuffer_append(sb_public, "set");
+			stringbuffer_append(sb_public, funct);
+			stringbuffer_append(sb_public, "(const ");
+			stringbuffer_append(sb_public, type);
+			if (isChar) {
+				stringbuffer_append(sb_public, "&");
+			}
+			stringbuffer_append(sb_public, "value);\n");
+		}
 
-		fprintf(pfile_h, "%s%s_get%s();\n", type, self->name, funct);
+		/*
+		 * typeself->name_getfunct();\n
+		 */
+		stringbuffer_append(sb_public, "\t\t"); 
+		stringbuffer_append(sb_public, type); 
+		stringbuffer_append(sb_public, "get"); 
+		stringbuffer_append(sb_public, funct); 
+		stringbuffer_append(sb_public, "();\n"); 
+	
+		/* private */
+		stringbuffer_append(sb_private, "\t\t");
+		stringbuffer_append(sb_private, type);
+		stringbuffer_append(sb_private, alpha);
+		stringbuffer_append(sb_private, ";\n");
 
-		/* definition */
-		stringbuffer_append(sb_definition, "\t");
+		/* init */
+		stringbuffer_append(sb_init, "\t");
 		if (isChar) {
-			stringbuffer_append(sb_definition, "char ");
-			stringbuffer_append(sb_definition, alpha);
-			stringbuffer_append(sb_definition, "[PARAMETER_VALUE_SIZE + 1]");
-		} else {
-			stringbuffer_append(sb_definition, type);
-			stringbuffer_append(sb_definition, alpha);
-		}
-		stringbuffer_append(sb_definition, ";\n");
-
-		/* declaration */
-		stringbuffer_append(sb_declaration, "\t.");
-		stringbuffer_append(sb_declaration, alpha);
-		stringbuffer_append(sb_declaration, " = ");
-		if (isChar)
-			stringbuffer_append(sb_declaration, "\"");
-		if (isBoolean) {
+			/*
+			 * strcpy(_self->name.alpha, value);
+			 */
+			stringbuffer_append(sb_init, "strcpy(");
+			stringbuffer_append(sb_init, "_");
+			stringbuffer_append(sb_init, self->name);
+			stringbuffer_append(sb_init, ".");
+			stringbuffer_append(sb_init, alpha);
+			stringbuffer_append(sb_init, ", \"");
+			stringbuffer_append(sb_init, value);
+			stringbuffer_append(sb_init, "\")");
+		} else if (isInteger) {
+			/*
+			 * _self->name.alpha = value
+			 */
+			stringbuffer_append(sb_init, "_");
+			stringbuffer_append(sb_init, self->name);
+			stringbuffer_append(sb_init, ".");
+			stringbuffer_append(sb_init, alpha);
+			stringbuffer_append(sb_init, " = ");
+			stringbuffer_append(sb_init, value);
+		} else if (isBoolean) {
+			/*
+			 * _self->name.alpha = TRUE|FALSE
+			 */
+			stringbuffer_append(sb_init, "_");
+			stringbuffer_append(sb_init, self->name);
+			stringbuffer_append(sb_init, ".");
+			stringbuffer_append(sb_init, alpha);
+			stringbuffer_append(sb_init, " = ");
 			BOOL tmp = boolean_toBoolean(value);
-			stringbuffer_append(sb_declaration, tmp ? "TRUE" : "FALSE");
-		} else 
-			stringbuffer_append(sb_declaration, value);
-		if (isChar)
-			stringbuffer_append(sb_declaration, "\"");
-		if (i < size -1)
-			stringbuffer_append(sb_declaration, ",");
-		stringbuffer_append(sb_declaration, "\n");
+			stringbuffer_append(sb_init, tmp ? "TRUE" : "FALSE");
+		}
+		stringbuffer_append(sb_init, ";\n");
 
 		/* show */
 		stringbuffer_append(sb_show, "\n");
@@ -362,18 +347,73 @@ void build_run_cpp(BUILD *self) {
 	}
 
 	/* header */
+	char *file_h = (char *) malloc(strlen(self->name) + 4 + 1);
+	strcpy(file_h, self->name);
+	strcat(file_h, ".hpp");
+	if (self->debug)
+		printf ( "HEADER-FILE:\t%s\n", file_h );
+	FILE *pfile_h;
+	pfile_h = fopen(file_h, "w");
+	if (pfile_h ==NULL)
+		message_error("unable to create header");
+
+	fprintf(pfile_h, "/* %s v.%s by %s */\n\n", PRG_NAME, PRG_VERSION, PRG_AUTHOR);
+	char *def = string_toUpper(self->name);
+	fprintf(pfile_h, "#ifndef %s_H\n", def);
+	fprintf(pfile_h, "#define %s_H\n", def);
+	free(def);
+	fprintf(pfile_h, "\n");
+	fprintf(pfile_h, "class %s {\n", self->name);
+	fprintf(pfile_h, "\tprivate:\n");
+	fprintf(pfile_h, stringbuffer_getTextPointer(sb_private));
+	fprintf(pfile_h, "\tpublic:\n");
+	fprintf(pfile_h, "\t\t%s();\n", self->name);
+	fprintf(pfile_h, "\t\tvoid init();\n");
+	fprintf(pfile_h, "\t\tvoid show();\n");
+	fprintf(pfile_h, "\t\tvoid load(const std::string &filename);\n");
+	if (!self->read) {                          /* NOT read only */
+		fprintf(pfile_h, "\t\tvoid save(const std::string &filename);\n");
+		fprintf(pfile_h, "\t\tvoid open(const std::string &filename);\n");
+		fprintf(pfile_h, "\t\tvoid edit();\n");
+	}
+	fprintf(pfile_h, "\n");
+	fprintf(pfile_h, stringbuffer_getTextPointer(sb_public));
+	fprintf(pfile_h, "};\n");
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "#endif\n");
 
-	/* definition */
-	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_definition));
-	fprintf(pfile_c, "} %s_t;\n", self->name);
+	/* code */
+	char *file_c = (char *) malloc(strlen(self->name) + 4 + 1);
+	strcpy(file_c, self->name);
+	strcat(file_c, ".cpp");
+	if (self->debug)
+		printf ( "CODE-FILE:\t%s\n", file_c );
+	FILE *pfile_c;
+	pfile_c = fopen(file_c, "w");
+	if (pfile_c ==NULL)
+		message_error("unable to create code");
+
+	fprintf(pfile_c, "#include <stdlib.h>\n");
+	fprintf(pfile_c, "#include <stdio.h>\n");
+	fprintf(pfile_c, "#include <string.h>\n");
+	fprintf(pfile_c, "#include <la_file.h>\n");
+	fprintf(pfile_c, "#include <la_message.h>\n");
+	fprintf(pfile_c, "#include <la_number.h>\n");
+	fprintf(pfile_c, "#include <la_parameter.h>\n");
+	fprintf(pfile_c, "#include <la_string.h>\n");
+	fprintf(pfile_c, "#include <la_stringbuffer.h>\n");
+	fprintf(pfile_c, "#include <la_system.h>\n");
+	fprintf(pfile_c, "#include \"%s.h\"\n", self->name);
 	fprintf(pfile_c, "\n");
 
-	/* declaration */
-	fprintf(pfile_c, "static %s_t _%s = {\n", self->name, self->name);
-	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_declaration));
-	fprintf(pfile_c, "};\n");
+	/* init */
+	fprintf(pfile_c, "\n");
+	fprintf(pfile_c, "void %s_init() {\n", self->name);
+	fprintf(pfile_c, "void %s_init() {\n", self->name);
+	fprintf(pfile_c, "\tmemset(&_%s, '\\0', sizeof(%s_t));\n", self->name, self->name);
+	fprintf(pfile_c, "\n");
+	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_init));
+	fprintf(pfile_c, "}\n");
 
 	/* show */
 	fprintf(pfile_c, "\n");
@@ -457,18 +497,20 @@ void build_run_cpp(BUILD *self) {
 	/* access */
 	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_access));
 
-	stringbuffer_free(sb_access);
-	stringbuffer_free(sb_edit);
-	stringbuffer_free(sb_save);
-	stringbuffer_free(sb_load);
-	stringbuffer_free(sb_show);
-	stringbuffer_free(sb_declaration);
-	stringbuffer_free(sb_definition);
 	fclose(pfile_c);
 	fclose(pfile_h);
 		
 	free(file_h);
 	free(file_c);
+
+	/* free */
+	stringbuffer_free(sb_access);
+	stringbuffer_free(sb_edit);
+	stringbuffer_free(sb_save);
+	stringbuffer_free(sb_load);
+	stringbuffer_free(sb_show);
+	stringbuffer_free(sb_private);
+	stringbuffer_free(sb_public);
 
 	printf ( "%s.c and %s.h has been crested successfully.\n", self->name, self->name );
 }

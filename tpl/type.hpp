@@ -10,13 +10,8 @@ class test {
 		bool boolean;
 		std::string main_sub;
 	public:
-		test() {
-			key = "value",
-			integer = 123,
-			boolean = true,
-			main_sub = "example";
-		}
-		void clean();
+		test();
+		void init();
 		void show();
 		void load(const std::string &filename);
 		void save(const std::string &filename);

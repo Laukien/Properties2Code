@@ -10,7 +10,11 @@
 #include <la_system.h>
 #include "type.hpp"
 
-void test::clean() {
+void test::test() {
+	this->init();
+}
+
+void test::init() {
 	this->key = "value";
 	this->integer = 123;
 	this->boolean = true;

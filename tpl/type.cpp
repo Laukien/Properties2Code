@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <la_boolean.h>
 #include <la_file.h>
 #include <la_message.h>
@@ -9,6 +10,12 @@
 #include <la_system.h>
 #include "type.hpp"
 
+void test::clean() {
+	this->key = "value";
+	this->integer = 123;
+	this->boolean = true;
+	this->main_sub = "example";
+}
 
 void test::show() {
 	/* key */
@@ -25,166 +32,143 @@ void test::show() {
 }
 
 void test::load(const std::string &filename) {
-	if (!la::file::exists(filename))
+	if (!la::file::exists(filename)) {
 		la::message::error("properties-file not found");
-
-	test->clean();
-
-	char *tmp;
-	PARAMETER *param = parameter_new();
-	parameter_loadFromFile(param, filename);
-
-	/* key */
-	tmp = parameter_get(param, "key");
-	if (tmp == NULL)
-		this->key[0] = '\0';
-	else {
-		strcpy(this->key, tmp);
-		free(tmp);
 	}
 
+	this->clean();
+
+	std::string tmp;
+	la::parameter param;
+	param.loadFromFile(filename);
+
+	/* key */
+	this->key = param.get("key");
+
 	/* integer */
-	tmp = parameter_get(param, "integer");
-	if (tmp == NULL)
+	tmp = param.get("integer");
+	if (tmp.empty()) {
 		this->integer = -1;
-	else {
-		this->integer = number_toInteger(tmp);
-		free(tmp);
+	} else {
+		this->integer = la::number::toInteger(tmp);
 	}
 
 	/* boolean */
-	tmp = parameter_get(param, "boolean");
-	if (tmp == NULL)
+	tmp = param.get("boolean");
+	if (tmp.empty()) {
 		this->boolean = FALSE;
-	else {
-		this->boolean = boolean_toBoolean(tmp);
-		free(tmp);
+	} else {
+		this->boolean = la::boolean::toBoolean(tmp);
 	}
 
 	/* main.sub */
-	tmp = parameter_get(param, "main.sub");
-	if (tmp == NULL)
-		this->main_sub[0] = '\0';
-	else {
-		strcpy(this->main_sub, tmp);
-		free(tmp);
-	}
-
-	parameter_free(param);
+	main_sub = param.get("main.sub");
 }
 
 void test::save(const std::string &filename) {
-	char *tmp;
-	PARAMETER *param = parameter_new();
+	std::string tmp;
+	la::parameter param;
 
 	/* key */
-	parameter_add(param, "key", this->key);
+	param.add("key", this->key);
 
 	/* integer */
-	tmp = number_integerToString(this->integer);
-	parameter_add(param, "integer", tmp);
-	free(tmp);
+	param.add("integer", la::number::toString(this->integer));
 
 	/* boolean */
-	tmp = boolean_toString(this->boolean);
-	parameter_add(param, "boolean", tmp);
-	free(tmp);
+	param.add("boolean", la::boolean::toString(this->boolean));
 
 	/* main.sub */
-	parameter_add(param, "main.sub", this->main_sub);
+	param.add("main.sub", this->main_sub);
 
-	parameter_saveToFile(param, filename);
-	parameter_free(param);
+	param.saveToFile(filename);
 }
 
 void test::open(const std::string &filename) {
-	if (!file_exists(filename))
-		test::save(filename);
+	if (!la::file::exists(filename)) {
+		this->save(filename);
+	}
 
-	STRINGBUFFER *cmd = stringbuffer_new();
+	std::string cmd;
 #ifdef SYSTEM_OS_TYPE_WINDOWS
-	stringbuffer_append(cmd, "notepad.exe");
+	cmd += "notepad.exe";
 #else
-	if (file_exists("/usr/bin/vim"))
-		stringbuffer_append(cmd, "/usr/bin/vim");
-	else if (file_exists("/usr/bin/emacs"))
-		stringbuffer_append(cmd, "/usr/bin/emacs");
-	else if (file_exists("/usr/bin/nano"))
-		stringbuffer_append(cmd, "/usr/bin/nano");
-	else if (file_exists("/bin/vi"))
-		stringbuffer_append(cmd, "/bin/vi");
-	else
+	if (la::file::exists("/usr/bin/vim")) {
+		cmd += "/usr/bin/vim";
+	} else if (la::file::exists("/usr/bin/emacs")) {
+		cmd += "/usr/bin/emacs";
+	} else if (la::file::exists("/usr/bin/nano")) {
+		cmd += "/usr/bin/nano";
+	} else if (la::file::exists("/bin/vi")) {
+		cmd += "/bin/vi";
+	} else {
 		la::message::error("no editor found");
+	}
 #endif
-	stringbuffer_append(cmd, " ");
-	stringbuffer_append(cmd, filename);
+	cmd += " ";
+	cmd += filename;
 
-	system(stringbuffer_getTextPointer(cmd));
+	system(cmd.c_str());
 
-	stringbuffer_free(cmd);
-
-	test::load(filename);
+	this->load(filename);
 }
 
 void test::edit() {
 	char buffer[PARAMETER_VALUE_SIZE + 1];
-	char *tmp;
+	std::string tmp;
 
 	/* key */
-	printf("key [%s]: ", this->key);
-	fflush(stdout);
-	fgets(buffer, PARAMETER_VALUE_SIZE , stdin);
-	tmp = string_trim(buffer);
-	if (tmp) {
-		strcpy(this->key, tmp);
+	std::cout << "key [" <<  this->key << "]: " << std::flush;
+	std::cin.clear();
+	std::cin.getline(buffer, '\n');
+	if (buffer[0] != '\0') {
+		tmp = la::string::trim(buffer);
+		this->key = tmp;
 	}
-	free(tmp);
 
 	/* integer */
-	printf("integer [%d]: ", this->integer);
-	fflush(stdout);
-	fgets(buffer, PARAMETER_VALUE_SIZE , stdin);
-	tmp = string_trim(buffer);
-	if (tmp) {
-		if (!number_isInteger(tmp))
+	std::cout << "integer [" << this->integer << "]: " << std::flush;;
+	std::cin.clear();
+	std::cin.getline(buffer, '\n');
+	if (buffer[0] != '\0') {
+		tmp = la::string::trim(buffer);
+		if (tmp.empty() || !la::number::isInteger(tmp)) {
 			la::message::error("invalid value");
-		this->integer = number_toInteger(tmp);
+		}
+		this->integer = la::number::toInteger(tmp);
 	}
-	free(tmp);
 
 	/* boolean */
-	tmp = boolean_toString(this->boolean);
-	printf("boolean [%s]: ", tmp);
-	free(tmp);
-	fflush(stdout);
-	fgets(buffer, PARAMETER_VALUE_SIZE , stdin);
-	tmp = string_trim(buffer);
-	if (tmp) {
-		if (!boolean_isBoolean(tmp))
+	std::cout << "boolean [" << la::boolean::toString(this->boolean) << "]: " << std::flush;
+	std::cin.clear();
+	std::cin.getline(buffer, '\n');
+	if (buffer[0] != '\0') {
+		tmp = la::string::trim(buffer);
+		if (tmp.empty() || !la::boolean::isBoolean(tmp)) {
 			la::message::error("invalid value");
-		this->boolean = boolean_toBoolean(tmp);
+		}
+		this->boolean = la::boolean::toBoolean(tmp);
 	}
-	free(tmp);
 
 	/* main.sub */
-	printf("main.sub [%s]: ", this->main_sub);
-	fflush(stdout);
-	fgets(buffer, PARAMETER_VALUE_SIZE , stdin);
-	tmp = string_trim(buffer);
-	if (tmp) {
-		strcpy(this->main_sub, tmp);
+	std::cout << "main.sub [" <<  this->main_sub << "]: " << std::flush;
+	std::cin.clear();
+	std::cin.getline(buffer, '\n');
+	if (buffer[0] != '\0') {
+		tmp = la::string::trim(buffer);
+		this->main_sub = tmp;
 	}
-	free(tmp);
 }
 
 void test::setKey(const std::string &value) {
-	if (strlen(value) > PARAMETER_VALUE_SIZE)
+	if (value.length() > PARAMETER_VALUE_SIZE) {
 		la::message::error("value to long");
+	}
 
-	strcpy(this->key, value);
+	this->key = value;
 }
 
-char *test::getKey() {
+std::string test::getKey() {
 	return this->key;
 }
 
@@ -205,17 +189,17 @@ bool test::getBoolean() {
 }
 
 void test::setMainSub(const std::string &value) {
-	if (strlen(value) > PARAMETER_VALUE_SIZE)
+	if (value.length() > PARAMETER_VALUE_SIZE) {
 		la::message::error("value to long");
+	}
 
-	strcpy(this->main_sub, value);
+	this->main_sub = value;
 }
 
-char *test::getMainSub() {
+std::string test::getMainSub() {
 	return this->main_sub;
 }
 
-#include <stdio.h>
 int main(void) {
 	test test;
 	test.load("test.properties");

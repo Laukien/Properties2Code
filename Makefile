@@ -19,7 +19,7 @@ template:
 	$(CXX) $(CXXFLAGS) -o tpl/type_cpp tpl/type.cpp /usr/local/lib/libla++.a
 
 test:
-	bin/prop2code -f test.properties -n -t c test_c
+	bin/prop2code -f test.properties -t c -n test_c
 	echo "#include <stdio.h>" > test_c_main.c
 	echo "#include \"test_c.h\"" >> test_c_main.c
 	echo "int main(void) {" >> test_c_main.c
@@ -34,7 +34,7 @@ test:
 	$(CC) $(CFLAGS) -c -o test_c.o test_c.c
 	$(CC) $(CFLAGS) -o test_c test_c_main.c test_c.o /usr/local/lib/libla.a
 	./test_c
-	bin/prop2code -f test.properties -n -t cpp test_cpp
+	bin/prop2code -f test.properties -t cpp -n test_cpp
 
 install:
 	strip bin/prop2code

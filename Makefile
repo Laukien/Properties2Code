@@ -15,8 +15,8 @@ all:
 	$(CC) $(CFLAGS) -o bin/prop2code src/main.c $(LIB)
 
 template:
-	$(CC) $(CFLAGS) -o tpl/type_c tpl/type.c $(LIB)
-	$(CC) $(CFLAGS) -o tpl/type_cpp tpl/type.cpp $(LIB)
+	$(CC) $(CFLAGS) -o tpl/type_c tpl/type.c /usr/local/lib/libla.a
+	$(CXX) $(CXXFLAGS) -o tpl/type_cpp tpl/type.cpp /usr/local/lib/libla++.a
 
 test:
 	bin/prop2code -f test.properties -n -t c test_c

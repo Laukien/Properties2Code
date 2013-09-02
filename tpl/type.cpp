@@ -10,7 +10,7 @@
 #include <la_system.h>
 #include "type.hpp"
 
-void test::test() {
+test::test() {
 	this->init();
 }
 
@@ -40,7 +40,7 @@ void test::load(const std::string &filename) {
 		la::message::error("properties-file not found");
 	}
 
-	this->clean();
+	this->init();
 
 	std::string tmp;
 	la::parameter param;

@@ -146,19 +146,19 @@ void build_run_cpp(BUILD *self) {
 			stringbuffer_append(sb_load, "\tif (tmp.empty())\n");
 			if (isInteger) {
 				stringbuffer_append(sb_load, "\t\tthis->");
-				stringbuffer_append(sb_load, key);
+				stringbuffer_append(sb_load, alpha);
 				stringbuffer_append(sb_load, " = -1;\n");
 				stringbuffer_append(sb_load, "\telse\n");
 				stringbuffer_append(sb_load, "\t\tthis->");
-				stringbuffer_append(sb_load, key);
+				stringbuffer_append(sb_load, alpha);
 				stringbuffer_append(sb_load, " = la::number::toInteger(tmp);\n");
 			} else if (isBoolean) {
 				stringbuffer_append(sb_load, "\t\tthis->");
-				stringbuffer_append(sb_load, key);
+				stringbuffer_append(sb_load, alpha);
 				stringbuffer_append(sb_load, " = false;\n");
 				stringbuffer_append(sb_load, "\telse\n");
 				stringbuffer_append(sb_load, "\t\tthis->");
-				stringbuffer_append(sb_load, key);
+				stringbuffer_append(sb_load, alpha);
 				stringbuffer_append(sb_load, " = la::boolean::toBoolean(tmp);\n");
 			}
 
@@ -207,7 +207,7 @@ void build_run_cpp(BUILD *self) {
 			stringbuffer_append(sb_edit, " << \"]: \" << std::flush;\n");
 
 			stringbuffer_append(sb_edit, "\tstd::cin.clear();\n");
-			stringbuffer_append(sb_edit, "\tstd::cin.getline(buffer, '\\n');\n");
+			stringbuffer_append(sb_edit, "\tstd::cin.getline(buffer, PARAMETER_VALUE_SIZE, '\\n');\n");
 			stringbuffer_append(sb_edit, "\tif (buffer[0] != '\\0') {\n");
 			stringbuffer_append(sb_edit, "\t\ttmp = la::string::trim(buffer);\n");
 			if (isChar) {

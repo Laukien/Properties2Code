@@ -6,12 +6,16 @@
 #include <la_number.h>
 #include <la_parameter.h>
 #include <la_string.h>
-#include <la_stringbuffer.h>
 #include <la_system.h>
 #include "type.hpp"
 
+
 test::test() {
 	this->init();
+}
+
+test::~test() {
+
 }
 
 void test::init() {
@@ -29,16 +33,15 @@ void test::show() {
 	std::cout << "integer: " << this->getInteger() << std::endl;
 
 	/* boolean */
-	std::cout <<  "boolean: " << la::boolean::toString(this->getBoolean()) << std::endl;
+	std::cout << "boolean: " << la::boolean::toString(this->getBoolean()) << std::endl;
 
 	/* main.sub */
-	std::cout << "main.sub: " <<  this->getMainSub() << std::endl;
+	std::cout << "main.sub: " << this->getMainSub() << std::endl;
 }
 
 void test::load(const std::string &filename) {
-	if (!la::file::exists(filename)) {
+	if (!la::file::exists(filename))
 		la::message::error("properties-file not found");
-	}
 
 	this->init();
 
@@ -51,22 +54,20 @@ void test::load(const std::string &filename) {
 
 	/* integer */
 	tmp = param.get("integer");
-	if (tmp.empty()) {
+	if (tmp.empty())
 		this->integer = -1;
-	} else {
+	else
 		this->integer = la::number::toInteger(tmp);
-	}
 
 	/* boolean */
 	tmp = param.get("boolean");
-	if (tmp.empty()) {
-		this->boolean = FALSE;
-	} else {
+	if (tmp.empty())
+		this->boolean = false;
+	else
 		this->boolean = la::boolean::toBoolean(tmp);
-	}
 
 	/* main.sub */
-	main_sub = param.get("main.sub");
+	this->main_sub = param.get("main.sub");
 }
 
 void test::save(const std::string &filename) {
@@ -89,25 +90,23 @@ void test::save(const std::string &filename) {
 }
 
 void test::open(const std::string &filename) {
-	if (!la::file::exists(filename)) {
+	if (!la::file::exists(filename))
 		this->save(filename);
-	}
 
 	std::string cmd;
 #ifdef SYSTEM_OS_TYPE_WINDOWS
 	cmd += "notepad.exe";
 #else
-	if (la::file::exists("/usr/bin/vim")) {
+	if (la::file::exists("/usr/bin/vim"))
 		cmd += "/usr/bin/vim";
-	} else if (la::file::exists("/usr/bin/emacs")) {
+	else if (la::file::exists("/usr/bin/emacs"))
 		cmd += "/usr/bin/emacs";
-	} else if (la::file::exists("/usr/bin/nano")) {
+	else if (la::file::exists("/usr/bin/nano"))
 		cmd += "/usr/bin/nano";
-	} else if (la::file::exists("/bin/vi")) {
+	else if (la::file::exists("/bin/vi"))
 		cmd += "/bin/vi";
-	} else {
+	else
 		la::message::error("no editor found");
-	}
 #endif
 	cmd += " ";
 	cmd += filename;
@@ -122,7 +121,7 @@ void test::edit() {
 	std::string tmp;
 
 	/* key */
-	std::cout << "key [" <<  this->key << "]: " << std::flush;
+	std::cout << "key [" << this->key << "]: " << std::flush;
 	std::cin.clear();
 	std::cin.getline(buffer, '\n');
 	if (buffer[0] != '\0') {
@@ -131,14 +130,13 @@ void test::edit() {
 	}
 
 	/* integer */
-	std::cout << "integer [" << this->integer << "]: " << std::flush;;
+	std::cout << "integer [" << this->integer << "]: " << std::flush;
 	std::cin.clear();
 	std::cin.getline(buffer, '\n');
 	if (buffer[0] != '\0') {
 		tmp = la::string::trim(buffer);
-		if (tmp.empty() || !la::number::isInteger(tmp)) {
+		if (tmp.empty() || !la::number::isInteger(tmp))
 			la::message::error("invalid value");
-		}
 		this->integer = la::number::toInteger(tmp);
 	}
 
@@ -148,14 +146,13 @@ void test::edit() {
 	std::cin.getline(buffer, '\n');
 	if (buffer[0] != '\0') {
 		tmp = la::string::trim(buffer);
-		if (tmp.empty() || !la::boolean::isBoolean(tmp)) {
+		if (tmp.empty() || !la::boolean::isBoolean(tmp))
 			la::message::error("invalid value");
-		}
 		this->boolean = la::boolean::toBoolean(tmp);
 	}
 
 	/* main.sub */
-	std::cout << "main.sub [" <<  this->main_sub << "]: " << std::flush;
+	std::cout << "main.sub [" << this->main_sub << "]: " << std::flush;
 	std::cin.clear();
 	std::cin.getline(buffer, '\n');
 	if (buffer[0] != '\0') {
@@ -165,9 +162,8 @@ void test::edit() {
 }
 
 void test::setKey(const std::string &value) {
-	if (value.length() > PARAMETER_VALUE_SIZE) {
+	if (value.length() > PARAMETER_VALUE_SIZE)
 		la::message::error("value to long");
-	}
 
 	this->key = value;
 }
@@ -193,9 +189,8 @@ bool test::getBoolean() {
 }
 
 void test::setMainSub(const std::string &value) {
-	if (value.length() > PARAMETER_VALUE_SIZE) {
+	if (value.length() > PARAMETER_VALUE_SIZE)
 		la::message::error("value to long");
-	}
 
 	this->main_sub = value;
 }

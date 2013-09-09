@@ -3,6 +3,8 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include <string>
+
 class test {
 	private:
 		std::string key;
@@ -11,6 +13,7 @@ class test {
 		std::string main_sub;
 	public:
 		test();
+		~test();
 		void init();
 		void show();
 		void load(const std::string &filename);

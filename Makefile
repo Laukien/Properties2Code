@@ -20,8 +20,7 @@ template:
 
 test:
 	bin/prop2code -f test.properties -t c -n test
-	echo "#include <stdio.h>" > test_c.c
-	echo "#include \"test.h\"" >> test_c.c
+	echo "#include \"test.h\"" > test_c.c
 	echo "int main(void) {" >> test_c.c
 	echo "	test_load(\"test.properties\");" >> test_c.c
 	echo "" >> test_c.c
@@ -34,6 +33,19 @@ test:
 	$(CC) $(CFLAGS) -o test_c test_c.c test.c /usr/local/lib/libla.a
 	./test_c
 	bin/prop2code -f test.properties -t cpp -n test
+	echo "#include \"test.hpp\"" > test_cpp.cpp
+	echo "int main(void) {" >> test_cpp.cpp
+	echo "	test cfg;" >> test_cpp.cpp
+	echo "  cfg.load(\"test.properties\");" >> test_cpp.cpp
+	echo "" >> test_cpp.cpp
+	echo "	cfg.show();" >> test_cpp.cpp
+	echo "" >> test_cpp.cpp
+	echo "	cfg.save(\"test_cpp.backup\");" >> test_cpp.cpp
+	echo "" >> test_cpp.cpp
+	echo "	return 0;" >> test_cpp.cpp
+	echo "}" >> test_cpp.cpp
+	$(CXX) $(CXXFLAGS) -o test_cpp test_cpp.cpp test.cpp /usr/local/lib/libla++.a
+	./test_cpp
 
 install:
 	strip bin/prop2code

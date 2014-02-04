@@ -1,7 +1,7 @@
 #ifndef BUILD_H
 #define BUILD_H
 
-#include <la_common.h>
+#include <la_boolean.h>
 #include <la_parameter.h>
 
 typedef struct {

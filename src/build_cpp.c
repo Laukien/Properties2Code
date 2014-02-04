@@ -366,7 +366,7 @@ void build_run_cpp(BUILD *self) {
 	fprintf(pfile_c, "\tthis->init();\n");
 	fprintf(pfile_c, "\n");
 	fprintf(pfile_c, "\tstd::string tmp;\n");
-	fprintf(pfile_c, "\tla::parameter param;\n");
+	fprintf(pfile_c, "\tla::parameter::Parameter param;\n");
 	fprintf(pfile_c, "\tparam.loadFromFile(filename);\n");
 	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_load));
 	fprintf(pfile_c, "}\n");
@@ -376,7 +376,7 @@ void build_run_cpp(BUILD *self) {
 		fprintf(pfile_c, "\n");
 		fprintf(pfile_c, "void %s::save(const std::string &filename) {\n", self->name);
 		fprintf(pfile_c, "\tstd::string tmp;\n");
-		fprintf(pfile_c, "\tla::parameter param;\n");
+		fprintf(pfile_c, "\tla::parameter::Parameter param;\n");
 		fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_save));
 		fprintf(pfile_c, "\n");
 		fprintf(pfile_c, "\tparam.saveToFile(filename);\n");

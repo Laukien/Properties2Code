@@ -15,6 +15,9 @@ void build_run_cpp(BUILD *self) {
 	char *value;
 	char type[15];
 
+	/* class */
+	char *class = string_toCamel(self->name);
+
 	/* body */
 	BOOL isChar;
 	BOOL isInteger;
@@ -233,7 +236,7 @@ void build_run_cpp(BUILD *self) {
 		if (!self->read) {
 			stringbuffer_append(sb_access, "\n");
 			stringbuffer_append(sb_access, "void ");
-			stringbuffer_append(sb_access, self->name);
+			stringbuffer_append(sb_access, class);
 			stringbuffer_append(sb_access, "::set");
 			stringbuffer_append(sb_access, funct);
 			stringbuffer_append(sb_access, "(const ");
@@ -254,7 +257,7 @@ void build_run_cpp(BUILD *self) {
 
 			stringbuffer_append(sb_access, "\n");
 			stringbuffer_append(sb_access, type);
-			stringbuffer_append(sb_access, self->name);
+			stringbuffer_append(sb_access, class);
 			stringbuffer_append(sb_access, "::get");
 			stringbuffer_append(sb_access, funct);
 			stringbuffer_append(sb_access, "() {\n");
@@ -290,12 +293,12 @@ void build_run_cpp(BUILD *self) {
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "#include <string>\n");
 	fprintf(pfile_h, "\n");
-	fprintf(pfile_h, "class %s {\n", self->name);
+	fprintf(pfile_h, "class %s {\n", class);
 	fprintf(pfile_h, "\tprivate:\n");
 	fprintf(pfile_h, stringbuffer_getTextPointer(sb_private));
 	fprintf(pfile_h, "\tpublic:\n");
-	fprintf(pfile_h, "\t\t%s();\n", self->name);
-	fprintf(pfile_h, "\t\t~%s();\n", self->name);
+	fprintf(pfile_h, "\t\t%s();\n", class);
+	fprintf(pfile_h, "\t\t~%s();\n", class);
 	fprintf(pfile_h, "\t\tvoid init();\n");
 	fprintf(pfile_h, "\t\tvoid show();\n");
 	fprintf(pfile_h, "\t\tvoid load(const std::string &filename);\n");
@@ -335,31 +338,31 @@ void build_run_cpp(BUILD *self) {
 
 	/* constructor */
 	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "%s::%s() {\n", self->name, self->name);
+	fprintf(pfile_c, "%s::%s() {\n", class, class);
 	fprintf(pfile_c, "\tthis->init();\n");
 	fprintf(pfile_c, "}\n");
 
 	/* destructor */
 	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "%s::~%s() {\n", self->name, self->name);
+	fprintf(pfile_c, "%s::~%s() {\n", class, class);
 	fprintf(pfile_c, "\n");
 	fprintf(pfile_c, "}\n");
 
 	/* init */
 	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "void %s::init() {\n", self->name);
+	fprintf(pfile_c, "void %s::init() {\n", class);
 	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_init));
 	fprintf(pfile_c, "}\n");
 
 	/* show */
 	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "void %s::show() {", self->name);
+	fprintf(pfile_c, "void %s::show() {", class);
 	fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_show));
 	fprintf(pfile_c, "}\n");
 
 	/* load */
 	fprintf(pfile_c, "\n");
-	fprintf(pfile_c, "void %s::load(const std::string &filename) {\n", self->name);
+	fprintf(pfile_c, "void %s::load(const std::string &filename) {\n", class);
 	fprintf(pfile_c, "\tif (!la::file::exists(filename))\n");
 	fprintf(pfile_c, "\t\tla::message::error(\"properties-file not found\");\n");
 	fprintf(pfile_c, "\n");
@@ -374,7 +377,7 @@ void build_run_cpp(BUILD *self) {
 	/* save */
 	if (!self->read) {
 		fprintf(pfile_c, "\n");
-		fprintf(pfile_c, "void %s::save(const std::string &filename) {\n", self->name);
+		fprintf(pfile_c, "void %s::save(const std::string &filename) {\n", class);
 		fprintf(pfile_c, "\tstd::string tmp;\n");
 		fprintf(pfile_c, "\tla::parameter::Parameter param;\n");
 		fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_save));
@@ -386,7 +389,7 @@ void build_run_cpp(BUILD *self) {
 	/* open */
 	if (!self->read) {
 		fprintf(pfile_c, "\n");
-		fprintf(pfile_c, "void %s::open(const std::string &filename) {\n", self->name);
+		fprintf(pfile_c, "void %s::open(const std::string &filename) {\n", class);
 		fprintf(pfile_c, "\tif (!la::file::exists(filename))\n");
 		fprintf(pfile_c, "\t\tthis->save(filename);\n");
 		fprintf(pfile_c, "\n");
@@ -417,7 +420,7 @@ void build_run_cpp(BUILD *self) {
 	/* edit */
 	if (!self->read) {
 		fprintf(pfile_c, "\n");
-		fprintf(pfile_c, "void %s::edit() {\n", self->name);
+		fprintf(pfile_c, "void %s::edit() {\n", class);
 		fprintf(pfile_c, "\tchar buffer[PARAMETER_VALUE_SIZE + 1];\n");
 		fprintf(pfile_c, "\tstd::string tmp;\n");
 		fprintf(pfile_c, "%s", stringbuffer_getTextPointer(sb_edit));
@@ -441,6 +444,8 @@ void build_run_cpp(BUILD *self) {
 	stringbuffer_free(sb_show);
 	stringbuffer_free(sb_private);
 	stringbuffer_free(sb_public);
+
+	free(class);
 
 	printf ( "%s.cpp and %s.hpp has been crested successfully.\n", self->name, self->name );
 }

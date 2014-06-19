@@ -34,7 +34,7 @@ char *key2Alpha(const char *key) {
 	char *res = strdup(key);
     int i;
 	for (i = 0; i < strlen(res); ++i) {
-		if (!i && !isdigit(res[i])) {
+		if (!i && isdigit(res[i])) {
 			res[i]='_';
 			continue;
 		}

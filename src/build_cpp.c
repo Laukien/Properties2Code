@@ -43,7 +43,10 @@ void build_run_cpp(BUILD *self) {
 		alpha = key2Alpha(key);
 		upper = key2Upper(key);
 		funct = key2Function(alpha);
-		value = parameter_getValueByIndex(self->parameter, i);
+		char *tmp = parameter_getValueByIndex(self->parameter, i);
+		value = correctValue(tmp);
+		free(tmp);
+
 
 		if (number_isInteger(value)) {
 			isInteger = TRUE;

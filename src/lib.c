@@ -77,3 +77,20 @@ char *key2Function(const char *key) {
 
 	return res;
 }
+
+char *correctValue(const char *value) {
+	size_t len = strlen(value);
+	int count = character_count(value, '\\');
+
+	char *res = (char *)malloc(len + count + 1);
+
+	int i;
+	int j = 0;
+	for (i = 0; i < len; ++i) {
+		res[j++] = value[i];
+		if (value[i] == '\\') res[j++] = '\\';
+	}
+	res[j] = '\0';
+
+	return res;
+}

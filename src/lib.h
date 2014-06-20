@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #define PRG_NAME "Properties2Code"
-#define PRG_VERSION "0.5.4"
+#define PRG_VERSION "0.5.6"
 #define PRG_AUTHOR "Stephan Laukien"
 
 typedef enum {
@@ -25,5 +25,6 @@ void showVersion();
 char *key2Alpha(const char *key);
 char *key2Upper(const char *key);
 char *key2Function(const char *key);
+char *correctValue(const char *value);
 
 #endif

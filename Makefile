@@ -35,7 +35,7 @@ test:
 	bin/prop2code -f test.properties -t cpp -n test
 	echo "#include \"test.hpp\"" > test_cpp.cpp
 	echo "int main(void) {" >> test_cpp.cpp
-	echo "	test cfg;" >> test_cpp.cpp
+	echo "	Test cfg;" >> test_cpp.cpp
 	echo "  cfg.load(\"test.properties\");" >> test_cpp.cpp
 	echo "" >> test_cpp.cpp
 	echo "	cfg.show();" >> test_cpp.cpp

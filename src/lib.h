@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #define PRG_NAME "Properties2Code"
-#define PRG_VERSION "0.5.6"
+#define PRG_VERSION "0.5.7"
 #define PRG_AUTHOR "Stephan Laukien"
 
 typedef enum {

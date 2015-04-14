@@ -49,7 +49,6 @@ test:
 
 install:
 	strip bin/prop2code
-	gzexe bin/prop2code
 	cp bin/prop2code /usr/local/bin
 
 deinstall:

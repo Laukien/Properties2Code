@@ -396,7 +396,7 @@ void build_run_c(BUILD *self) {
 		fprintf(pfile_h, "void %s_edit();\n", self->name);
 	}
 	fprintf(pfile_h, "\n");
-	fprintf(pfile_h, stringbuffer_getTextPointer(sb_public));
+	fprintf(pfile_h, "%s", stringbuffer_getTextPointer(sb_public));
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "#endif\n");
 

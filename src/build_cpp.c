@@ -298,7 +298,7 @@ void build_run_cpp(BUILD *self) {
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "class %s {\n", class);
 	fprintf(pfile_h, "\tprivate:\n");
-	fprintf(pfile_h, stringbuffer_getTextPointer(sb_private));
+	fprintf(pfile_h, "%s", stringbuffer_getTextPointer(sb_private));
 	fprintf(pfile_h, "\tpublic:\n");
 	fprintf(pfile_h, "\t\t%s();\n", class);
 	fprintf(pfile_h, "\t\t~%s();\n", class);
@@ -311,7 +311,7 @@ void build_run_cpp(BUILD *self) {
 		fprintf(pfile_h, "\t\tvoid edit();\n");
 	}
 	fprintf(pfile_h, "\n");
-	fprintf(pfile_h, stringbuffer_getTextPointer(sb_public));
+	fprintf(pfile_h, "%s", stringbuffer_getTextPointer(sb_public));
 	fprintf(pfile_h, "};\n");
 	fprintf(pfile_h, "\n");
 	fprintf(pfile_h, "#endif\n");
